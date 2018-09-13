@@ -1,0 +1,187 @@
+#ifndef _VECTOR_H_
+#define _VECTOR_H_
+
+#include <cstring>
+
+
+template<typename T>
+class vector
+{
+private:
+	T* buff;
+	int len;
+	int cap;
+
+	enum{INCREMENT_SIZE = 100};
+public:
+	vector()
+	{
+		len = 0;
+		cap = 100;
+		buff = new T[cap];
+	}
+
+	~vector()
+	{
+		delete []buff;
+		len = 0;
+		cap = 0;
+	}
+
+	void push_back(const T& data)
+	{
+		if(len == cap)
+		{
+			T* temp = new T[cap += INCREMENT_SIZE];
+			memcpy(temp, buff, len * sizeof(T));
+			delete []buff;
+			buff = temp;
+		}
+		buff[len++] = data;
+	}
+
+	void push_front(const T& data)
+	{
+		if(len == cap)
+		{
+			T* temp = new T[cap += INCREMENT_SIZE];
+			memcpy(temp, buff, len * sizeof(T));
+			delete []buff;
+			buff = temp;
+		}
+		memmove(buff + 1, buff, len * sizeof(T));
+		buff[0] = data;
+		++len;
+	}
+
+	void insert(int pos, const T& data)
+	{
+		if(pos > len) pos = len;
+		if(pos < 0) pos = 0;
+		if(len == cap)
+		{
+			T* temp = new T[cap += INCREMENT_SIZE];
+			memcpy(temp, buff, len * sizeof(T));
+			delete []buff;
+			buff = temp;
+		}
+		memmove(buff + pos + 1, buff + pos, (len - pos) * sizeof(T));
+		buff[pos] = data;
+		++len;
+	}
+
+	bool Remove(const T& data)
+	{
+		if(cap > len * 3)
+		{
+			T* temp = new T[cap = len + 100];
+			mencpy(temp, buff, len * sizeof(T));
+			delete []buff;
+			buff = temp;
+		}
+		int i = 0;
+		for(i; i < len; ++i)
+		{
+			if(buff[i] == data) break;
+		}
+		if(i == len) return false;
+
+		menmove(buff + i, buff + i + 1, (len - i) * sizeof(T));
+		--len;
+		return true;
+	}
+
+	void clear()
+	{
+		len = 0;
+	}
+
+	//随机访问
+	T& operator[](int i) const
+	{
+		if(i < 0 || i >= len) throw 1;
+		return buff[i];
+	}
+
+	T& find(const T& data) const
+	{
+		int i;
+		for(i = 0; i < len; ++i)
+		{
+			if(buff[i] == data) break;
+		}
+		if(i == len) throw 1;
+		return buff[i];
+	}
+
+	bool empty() const
+	{
+		return !len;
+	}
+
+	int length() const
+	{
+		return len;
+	}
+
+	void reverse()
+	{
+		int i = 0;
+		T temp;
+		for(i; i < len / 2; ++i)
+		{
+			temp = buff[i];
+			buff[i] = buff[len - 1 - i];
+			buff[len - 1 - i] = temp;
+		}
+	}
+
+private:
+	void sort(T* buff, int l, bool(*fun)(const T&, const T&))
+	{
+		if(l == 1) return ;
+		if(l == 0) return ; 
+		int i = 0, j = l - 1;
+		T k = buff[i];
+		while(i != j)
+		{
+			while(i != j && fun(buff[j], k))
+				--j;
+			buff[i] = buff[j];
+			while(i != j && fun(k, buff[i]))
+				++i;
+			buff[j] = buff[i];
+		}
+		buff[i] = k;
+		sort(buff, i, fun);
+		sort(buff + i + 1, l - i - 1, fun);
+	}
+public:
+	void sort(bool(*fun)(const T&, const T&))
+	{
+		sort(buff, len, fun);
+	}
+
+	vector operator+(const vector& v) const
+	{
+		vector v1;
+		delete []v1.buff;
+		v1.buff = new T[v1.cap = length() + v.length()];
+		v1.len = v1.cap;
+		memcpy(v1.buff, buff, len);
+		mencpy(v1.buff + len, v.buff, v.len);
+		return v1;
+	}
+
+	vector& operator=(const vector& v)
+	{
+		delete []buff;
+		buff = new T[v.len];
+		memcpy(buff, v.buff, v.len);
+		len = v.len;
+		cap = v.cap;
+		return this;
+	}
+};
+
+#endif
